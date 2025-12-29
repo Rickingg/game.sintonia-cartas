@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jogo Sintonia</title>
+
+<style>
+/* RESET */
+*{margin:0;padding:0;box-sizing:border-box}
+
+/* BASE */
+body{
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height:100vh;
+    color:#1f2933;
+    overflow-x:hidden;
+}
+
+/* TELAS */
+.tela{
+    display:none;
+    min-height:100vh;
+    padding:1rem;
+    animation:fade .35s ease;
+}
+.tela.ativa{display:flex}
+
+@keyframes fade{
+    from{opacity:0;transform:translateY(10px)}
+    to{opacity:1;transform:translateY(0)}
+}
+
+/* TELA INICIAL */
+#inicio{
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+}
+.caixa-inicio{
+    max-width:420px;
+    width:100%;
+    padding:0 1rem;
+}
+h1{
+    font-size:clamp(2rem, 8vw, 3rem);
+    color:white;
+    margin-bottom:2rem;
+    text-shadow:3px 3px 6px rgba(0,0,0,0.3);
+    animation:pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse{
+    0%, 100%{transform:scale(1)}
+    50%{transform:scale(1.05)}
+}
+
+/* BOTÕES */
+.botao{
+    width:100%;
+    padding:1rem;
+    margin-bottom:1rem;
+    border:none;
+    border-radius:1.5rem;
+    font-size:clamp(1rem, 4vw, 1.15rem);
+    font-weight:700;
+    cursor:pointer;
+    transition:.2s;
+    box-shadow:0 8px 20px rgba(0,0,0,0.2);
+}
+.botao:hover{
+    transform:translateY(-3px);
+    box-shadow:0 12px 25px rgba(0,0,0,0.3);
+}
+.botao:active{transform:scale(.97)}
+
+.auto{
+    background:linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color:white;
+}
+.manual{
+    background:linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    color:white;
+}
+.fav{
+    background:linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    color:white;
+}
+
+/* BOTÃO VOLTAR */
+.voltar{
+    position:fixed;
+    top:1rem;
+    left:1rem;
+    font-size:1.5rem;
+    cursor:pointer;
+    color:white;
+    font-weight:bold;
+    background:rgba(255,255,255,0.25);
+    width:50px;
+    height:50px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:.2s;
+    z-index:100;
+    border:2px solid rgba(255,255,255,0.3);
+}
+.voltar:hover{
+    background:rgba(255,255,255,0.35);
+    transform:scale(1.1);
+}
+.voltar:active{
+    transform:scale(0.95);
+}
+
+/* TELA AUTO */
+#auto{
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:1rem;
+}
+
+/* CARTA */
+.carta-container{
+    width:100%;
+    max-width:420px;
+    margin:0 auto;
+    perspective:900px;
+}
+.carta{
+    display:flex;
+    border-radius:1.5rem;
+    overflow:hidden;
+    aspect-ratio:1.3/1;
+    box-shadow:0 20px 40px rgba(0,0,0,.4);
+    animation:entrar .4s ease;
+    border:4px solid rgba(255,255,255,0.3);
+}
+@keyframes entrar{
+    from{transform:rotateY(15deg) scale(.95);opacity:0}
+    to{transform:rotateY(0) scale(1);opacity:1}
+}
+
+.lado{
+    width:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding:1rem;
+    font-weight:700;
+    position:relative;
+    font-size:clamp(0.9rem, 3.5vw, 1.1rem);
+    line-height:1.4;
+}
+.esq{
+    background:linear-gradient(135deg, #ff6b9d 0%, #c06c84 100%);
+    color:white;
+}
+.dir{
+    background:linear-gradient(135deg, #56ab2f 0%, #a8e063 100%);
+    color:white;
+}
+
+.seta{
+    position:absolute;
+    top:8px;
+    font-size:1.3rem;
+    opacity:0.8;
+}
+.seta-esq{left:10px}
+.seta-dir{right:10px}
+
+/* AÇÕES */
+.acoes{
+    display:flex;
+    justify-content:center;
+    gap:1rem;
+    margin-top:1.5rem;
+    flex-wrap:wrap;
+    width:100%;
+    max-width:420px;
+}
+.acao{
+    padding:.8rem 1.8rem;
+    border:none;
+    border-radius:2rem;
+    font-weight:700;
+    cursor:pointer;
+    font-size:clamp(0.95rem, 4vw, 1.1rem);
+    transition:.2s;
+    box-shadow:0 6px 15px rgba(0,0,0,0.2);
+}
+.acao:hover{
+    transform:translateY(-2px);
+    box-shadow:0 8px 20px rgba(0,0,0,0.3);
+}
+.acao:active{
+    transform:scale(.95);
+}
+.nova{
+    background:linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    color:white;
+    flex:1;
+    min-width:120px;
+}
+.favoritar{
+    background:rgba(255,255,255,0.9);
+    color:#333;
+    padding:.8rem 1.5rem;
+}
+.favoritar.ativo{
+    background:linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+    color:white;
+}
+
+/* TELAS DE LISTA */
+#manual, #favoritos{
+    flex-direction:column;
+    padding-top:5rem;
+}
+
+/* LISTAS */
+.lista{
+    background:rgba(255,255,255,0.95);
+    border-radius:1.2rem;
+    padding:.8rem;
+    width:100%;
+    max-width:600px;
+    margin:0 auto;
+    box-shadow:0 10px 30px rgba(0,0,0,0.3);
+    max-height:calc(100vh - 7rem);
+    overflow-y:auto;
+}
+.item{
+    padding:.9rem;
+    border-radius:.8rem;
+    cursor:pointer;
+    transition:.2s;
+    margin-bottom:.3rem;
+    font-size:clamp(0.9rem, 3.5vw, 1rem);
+}
+.item:hover{
+    background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color:white;
+    transform:translateX(5px);
+}
+.item:active{
+    transform:translateX(3px) scale(.98);
+}
+
+.lista-vazia{
+    text-align:center;
+    padding:2rem 1rem;
+    color:#666;
+    font-size:clamp(0.9rem, 3.5vw, 1rem);
+}
+
+/* RESPONSIVO */
+@media (max-width: 480px){
+    .caixa-inicio{
+        padding:0 1.5rem;
+    }
+    .botao{
+        padding:.9rem;
+    }
+    .carta{
+        border:3px solid rgba(255,255,255,0.3);
+    }
+    .lado{
+        padding:.8rem;
+    }
+    .acoes{
+        gap:.8rem;
+    }
+    .acao{
+        padding:.7rem 1.2rem;
+    }
+}
+
+/* HORIZONTAL */
+@media (orientation:landscape) and (max-height: 600px){
+    .carta-container{
+        max-width:480px;
+    }
+    #auto{
+        padding:.5rem;
+    }
+    .acoes{
+        margin-top:1rem;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- INÍCIO -->
+<div id="inicio" class="tela ativa">
+  <div class="caixa-inicio">
+    <h1>🎴 Jogo Sintonia</h1>
+    <button class="botao auto" onclick="abrirAuto()">🎴 Carta Automática</button>
+    <button class="botao manual" onclick="abrirManual()">📝 Escolher Manualmente</button>
+    <button class="botao fav" onclick="abrirFavoritos()">⭐ Favoritos (<span id="cont">0</span>)</button>
+  </div>
+</div>
+
+<!-- AUTOMÁTICO -->
+<div id="auto" class="tela">
+  <span class="voltar" onclick="inicio()">←</span>
+  <div class="carta-container" id="areaCarta"></div>
+  <div class="acoes">
+    <button class="acao favoritar" id="btnFav" onclick="toggleFav()">❤️</button>
+    <button class="acao nova" onclick="sortear()">🔄 Nova Carta</button>
+  </div>
+</div>
+
+<!-- MANUAL -->
+<div id="manual" class="tela">
+  <span class="voltar" onclick="inicio()">←</span>
+  <div class="lista" id="listaManual"></div>
+</div>
+
+<!-- FAVORITOS -->
+<div id="favoritos" class="tela">
+  <span class="voltar" onclick="inicio()">←</span>
+  <div class="lista" id="listaFav"></div>
+</div>
+
+<script>
+// ===== CARTAS (100 ÚNICAS) =====
+const CARTAS = [
+  {id:1,esq:"Mais impulsivo",dir:"Mais racional"},
+  {id:2,esq:"Doce mais gostoso",dir:"Doce mais ruim"},
+  {id:3,esq:"Mais romântico",dir:"Menos romântico"},
+  {id:4,esq:"Melhor filme",dir:"Pior filme"},
+  {id:5,esq:"Matéria mais difícil",dir:"Mais fácil"},
+  {id:6,esq:"Melhor desculpa",dir:"Pior desculpa"},
+  {id:7,esq:"Superpoder mais inútil",dir:"Mais útil"},
+  {id:8,esq:"Mais falso",dir:"Menos falso"},
+  {id:9,esq:"Dia mais cansativo",dir:"Mais leve"},
+  {id:10,esq:"Coisa mais nojenta",dir:"Menos nojenta"},
+  {id:11,esq:"Mais organizado",dir:"Mais bagunceiro"},
+  {id:12,esq:"Pizza melhor sabor",dir:"Pior sabor"},
+  {id:13,esq:"Melhor presente",dir:"Pior presente"},
+  {id:14,esq:"Melhor jogo",dir:"Pior jogo"},
+  {id:15,esq:"Coisa mais sem noção",dir:"Mais sensata"},
+  {id:16,esq:"Poder mais perigoso",dir:"Menos perigoso"},
+  {id:17,esq:"Mais confiável",dir:"Menos confiável"},
+  {id:18,esq:"Professor mais rígido",dir:"Mais tranquilo"},
+  {id:19,esq:"Situação mais vergonhosa",dir:"Menos vergonhosa"},
+  {id:20,esq:"Mais atrasado",dir:"Mais pontual"},
+  {id:21,esq:"Mais tímido",dir:"Mais extrovertido"},
+  {id:22,esq:"Melhor sobremesa",dir:"Pior sobremesa"},
+  {id:23,esq:"Melhor encontro",dir:"Pior encontro"},
+  {id:24,esq:"Melhor música",dir:"Pior música"},
+  {id:25,esq:"Mentira mais óbvia",dir:"Mais convincente"},
+  {id:26,esq:"Herói melhor",dir:"Pior"},
+  {id:27,esq:"Mais popular",dir:"Menos popular"},
+  {id:28,esq:"Aula mais inútil",dir:"Mais útil"},
+  {id:29,esq:"Pior medo",dir:"Medo bobo"},
+  {id:30,esq:"Mais viciado em celular",dir:"Menos"},
+  {id:31,esq:"Mais paciente",dir:"Mais estressado"},
+  {id:32,esq:"Lanche melhor",dir:"Lanche pior"},
+  {id:33,esq:"Mais ciumento",dir:"Mais tranquilo"},
+  {id:34,esq:"Melhor série",dir:"Pior série"},
+  {id:35,esq:"Melhor zoeira",dir:"Mais pesada"},
+  {id:36,esq:"Poder mais estranho",dir:"Mais normal"},
+  {id:37,esq:"Mais odiado",dir:"Menos odiado"},
+  {id:38,esq:"Prova mais difícil",dir:"Mais fácil"},
+  {id:39,esq:"Pior castigo",dir:"Mais tranquilo"},
+  {id:40,esq:"Mais gastador",dir:"Mais econômico"},
+  {id:41,esq:"Mais otimista",dir:"Mais pessimista"},
+  {id:42,esq:"Bebida mais gostosa",dir:"Mais ruim"},
+  {id:43,esq:"Melhor casal",dir:"Pior casal"},
+  {id:44,esq:"Melhor aplicativo",dir:"Pior aplicativo"},
+  {id:45,esq:"Melhor piada",dir:"Pior piada"},
+  {id:46,esq:"Vilão mais forte",dir:"Mais fraco"},
+  {id:47,esq:"Mais carismático",dir:"Menos carismático"},
+  {id:48,esq:"Aluno mais dedicado",dir:"Menos dedicado"},
+  {id:49,esq:"Coisa mais assustadora",dir:"Menos assustadora"},
+  {id:50,esq:"Mais rico",dir:"Mais pobre"},
+  {id:51,esq:"Mais responsável",dir:"Menos responsável"},
+  {id:52,esq:"Salgado melhor",dir:"Salgado pior"},
+  {id:53,esq:"Mais apaixonado",dir:"Menos apaixonado"},
+  {id:54,esq:"Melhor rede social",dir:"Pior rede social"},
+  {id:55,esq:"Coisa mais aleatória",dir:"Mais normal"},
+  {id:56,esq:"Poder mais roubado",dir:"Mais fraco"},
+  {id:57,esq:"Mais engraçado",dir:"Menos engraçado"},
+  {id:58,esq:"Melhor nota",dir:"Pior nota"},
+  {id:59,esq:"Pior dor",dir:"Dor mais leve"},
+  {id:60,esq:"Melhor profissão",dir:"Pior profissão"},
+  {id:61,esq:"Mais sincero",dir:"Mais mentiroso"},
+  {id:62,esq:"Comida mais saudável",dir:"Menos saudável"},
+  {id:63,esq:"Melhor conversa",dir:"Mais chata"},
+  {id:64,esq:"Melhor youtuber",dir:"Pior youtuber"},
+  {id:65,esq:"Melhor desculpa pra faltar",dir:"Pior"},
+  {id:66,esq:"Poder que você queria",dir:"Que não queria"},
+  {id:67,esq:"Mais chato",dir:"Menos chato"},
+  {id:68,esq:"Escola melhor",dir:"Pior"},
+  {id:69,esq:"Situação mais tensa",dir:"Mais tranquila"},
+  {id:70,esq:"Melhor salário",dir:"Pior salário"},
+  {id:71,esq:"Mais corajoso",dir:"Mais medroso"},
+  {id:72,esq:"Comida que mais enjoa",dir:"Menos enjoa"},
+  {id:73,esq:"Melhor primeira impressão",dir:"Pior"},
+  {id:74,esq:"Melhor desenho",dir:"Pior desenho"},
+  {id:75,esq:"Coisa mais inútil",dir:"Mais útil"},
+  {id:76,esq:"Poder mais assustador",dir:"Menos assustador"},
+  {id:77,esq:"Mais fiel",dir:"Menos fiel"},
+  {id:78,esq:"Professor mais legal",dir:"Mais chato"},
+  {id:79,esq:"Pior erro",dir:"Erro pequeno"},
+  {id:80,esq:"Melhor investimento",dir:"Pior investimento"},
+  {id:81,esq:"Mais maduro",dir:"Mais infantil"},
+  {id:82,esq:"Melhor mistura",dir:"Pior mistura"},
+  {id:83,esq:"Melhor namorado(a)",dir:"Pior"},
+  {id:84,esq:"Melhor passatempo",dir:"Pior passatempo"},
+  {id:85,esq:"Coisa mais estranha",dir:"Mais comum"},
+  {id:86,esq:"Superpoder mais forte",dir:"Mais fraco"},
+  {id:87,esq:"Mais tóxico",dir:"Menos tóxico"},
+  {id:88,esq:"Matéria mais chata",dir:"Mais legal"},
+  {id:89,esq:"Coisa mais irritante",dir:"Menos irritante"},
+  {id:90,esq:"Maior sonho",dir:"Menor sonho"},
+  {id:91,esq:"Mais competitivo",dir:"Mais de boa"},
+  {id:92,esq:"Melhor comida",dir:"Pior comida"},
+  {id:93,esq:"Maior prova de amor",dir:"Menor"},
+  {id:94,esq:"Melhor brincadeira",dir:"Mais chata"},
+  {id:95,esq:"Melhor apelido",dir:"Pior apelido"},
+  {id:96,esq:"Poder mais legal",dir:"Mais sem graça"},
+  {id:97,esq:"Mais influente",dir:"Menos influente"},
+  {id:98,esq:"Dia mais difícil",dir:"Mais fácil"},
+  {id:99,esq:"Pior dia",dir:"Melhor dia"},
+  {id:100,esq:"Melhor negócio",dir:"Pior negócio"}
+];
+
+let atual=null;
+let favs=JSON.parse(localStorage.getItem("favs")||"[]");
+
+/* FUNÇÕES */
+function tela(id){
+  document.querySelectorAll(".tela").forEach(t=>t.classList.remove("ativa"));
+  document.getElementById(id).classList.add("ativa");
+}
+function inicio(){tela("inicio")}
+function abrirAuto(){sortear();tela("auto")}
+function abrirManual(){
+  let html="";
+  CARTAS.forEach(c=>{
+    html+=`<div class="item" onclick="mostrar(${c.id})">#${c.id} - ${c.esq} ←→ ${c.dir}</div>`;
+  });
+  listaManual.innerHTML=html;
+  tela("manual");
+}
+function abrirFavoritos(){
+  let html="";
+  if(favs.length===0){
+    html='<div class="lista-vazia">Nenhuma carta favoritada ainda 💔</div>';
+  }else{
+    favs.forEach(c=>{
+      html+=`<div class="item" onclick="mostrar(${c.id})">#${c.id} - ${c.esq} ←→ ${c.dir}</div>`;
+    });
+  }
+  listaFav.innerHTML=html;
+  tela("favoritos");
+}
+function mostrar(id){
+  atual=CARTAS.find(c=>c.id===id);
+  render();
+  tela("auto");
+}
+function sortear(){
+  atual=CARTAS[Math.floor(Math.random()*CARTAS.length)];
+  render();
+}
+function render(){
+  areaCarta.innerHTML=`
+    <div class="carta">
+      <div class="lado esq"><span class="seta seta-esq">←</span>${atual.esq}</div>
+      <div class="lado dir"><span class="seta seta-dir">→</span>${atual.dir}</div>
+    </div>`;
+  btn();
+}
+function toggleFav(){
+  let i=favs.findIndex(f=>f.id===atual.id);
+  if(i>-1)favs.splice(i,1); else favs.push(atual);
+  localStorage.setItem("favs",JSON.stringify(favs));
+  btn();cont();
+}
+function btn(){
+  btnFav.classList.toggle("ativo",favs.some(f=>f.id===atual.id));
+}
+function cont(){document.getElementById("cont").innerText=favs.length}
+cont();
+</script>
+
+</body>
+</html>
